@@ -45,23 +45,23 @@
 ```
 ## Пример использования:
 
-`1.` Клонируем репозиторий:
+1. Клонируем репозиторий:
 
     git clone https://github.com/alex-v-skor/docker_zimbra
 
-`2.` Переходим в директорию docker_zimbra
+2. Переходим в директорию docker_zimbra
 
     cd docker_zimbra
 
-`3.` Загружаем последнюю версию  Zimbra Collaboration Server. Например, для загрузки Open Source edition:
+3. Загружаем последнюю версию  Zimbra Collaboration Server. Например, для загрузки Open Source edition:
 
     wget -O opt/zimbra-install/zcs-rhel7.tgz  https://files.zimbra.com/downloads/8.7.1_GA/zcs-8.7.1_GA_1670.RHEL7_64.20161025045328.tgz
 
-`4.` Отредактируйте Makefile, если вы хотите изменить имя базового образа для следующей сборки. Имя по умолчанию - zimbra-centos-base
+4. Отредактируйте Makefile, если вы хотите изменить имя базового образа для следующей сборки. Имя по умолчанию - zimbra-centos-base
 
     sed -i 's/^IMAGE=.*/IMAGE=new-image-name/g' Makefile
 
-`5.` Создайте zimbra base docker image, он будет основой для нового контейнера.
+5. Создайте zimbra base docker image, он будет основой для нового контейнера.
 
 Перед запуском make изменените имя хоста, переменная HOSTNAME в файл setup.sh. Она участвует в создании пути к папке,
 которая будет использована для подключения /opt/zimbra из контейнера на ност докер сервера. Так же в этом файле можно добавить пакеты, которые будут установлены 
