@@ -1,5 +1,10 @@
 #!/bin/sh
 
+echo "Start script.." > /opt/zimbra/ins.log
+if [ ! -d "/opt/zimbra-install" ]; then
+  exit 0
+fi
+
 # Zimbra installation and configuration script
 
 echo "Enabling and starting sshd service"
@@ -29,23 +34,27 @@ sed -i 's/\$DOMAIN/'$DOMAIN'/g' \
 sed -i 's/\$HOSTNAME/'$HOSTNAME'/g' /var/named/db.$DOMAIN
 sed -i 's/\$CONTAINERIP/'$CONTAINERIP'/g' /var/named/db.$DOMAIN
 
-echo <<EOF > /etc/resolv.conf 
+echo <<EOF > /etc/resolv.conf
 search $DOMAIN
 nameserver 127.0.0.1
 options ndots:0
 EOF
+echo "search $DOMAIN" > /etc/resolv.conf
+echo "nameserver 127.0.0.1" >> /etc/resolv.conf
+echo "options ndots:0" >> /etc/resolv.conf
 
 echo "Restarting bind name server.."
 sleep 3
-sudo systemctl restart named 
+sudo systemctl enable named
+sudo systemctl restart named
 
 ## Install the Zimbra Collaboration ##
-
 tar xzvf /opt/zimbra-install/zcs-rhel7.tgz  -C /opt/zimbra-install/
 
 echo "Installing Zimbra Collaboration just the Software"
 rm -rf /opt/zimbra-install/zcs-rhel7.tgz
 cd /opt/zimbra-install/zcs-* && ./install.sh -s < /opt/zimbra-install/zimbra_install_keystrokes
+#ping -c3 ya.ru >> /opt/zimbra/ins.log
 
 # Create Config file
 touch /opt/zimbra-install/zimbra_install_config
@@ -135,7 +144,7 @@ zimbraFeatureBriefcasesEnabled="Enabled"
 zimbraFeatureTasksEnabled="Enabled"
 zimbraIPMode="ipv4"
 zimbraMailProxy="TRUE"
-zimbraMtaMyNetworks="127.0.0.0/8 [::1]/128 $CONTAINERIP/24 [fe80::]/64"
+zimbraMtaMyNetworks="127.0.0.0/8 [::1]/128 $CONTAINERIP/32 [fe80::]/64"
 zimbraPrefTimeZoneId="Africa/Nairobi"
 zimbraReverseProxyLookupTarget="TRUE"
 zimbraVersionCheckNotificationEmail="admin@$DOMAIN"
@@ -153,6 +162,9 @@ echo "Installing Zimbra Collaboration injecting the configuration"
 echo "Now restarting zimbra"
 sleep 5
 su - zimbra -c 'zmcontrol restart'
+
+rm -rf /opt/zimbra-install/
+rm -f /opt/start.sh
 
 if [ "$?" -eq 0 ]; then
     echo "Installation successful"
